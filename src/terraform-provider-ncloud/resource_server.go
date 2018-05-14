@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -10,30 +13,61 @@ func resourceServer() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceServerCreate,
 		Read:   resourceServerRead,
-		Update: resourceServerUpdate,
 		Delete: resourceServerDelete,
-
 		Schema: map[string]*schema.Schema{
-			"address": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+			"server_image_product_code": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Server image code, e.g",
+			},
+			"server_product_code": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Product code, e.g. Server Specification under https://www.ncloud.com/charge/calc",
 			},
 		},
 	}
 }
 
-func resourceServerCreate(d *schema.ResourceData, m interface{}) error {
+func resourceServerCreate(data *schema.ResourceData, meta interface{}) error {
+	client := meta.(*sdk.Conn)
+
+	reqParams := new(sdk.RequestCreateServerInstance)
+	reqParams.ServerImageProductCode = data.Get("server_image_product_code").(string)
+	reqParams.ServerProductCode = data.Get("server_product_code").(string)
+	reqParams.ServerCreateCount = 1
+
+	_, err := client.CreateServerInstances(reqParams)
+	if err != nil {
+		return fmt.Errorf("Failed to create servers %s", err)
+	}
+
 	return nil
 }
 
-func resourceServerRead(d *schema.ResourceData, m interface{}) error {
+func resourceServerRead(data *schema.ResourceData, meta interface{}) error {
+	client := meta.(*sdk.Conn)
+
+	reqParams := new(sdk.RequestGetServerInstanceList)
+
+	_, err := client.GetServerInstanceList(reqParams)
+	if err != nil {
+		return fmt.Errorf("Failed to create servers %s", err)
+	}
+
 	return nil
 }
 
-func resourceServerUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
+func resourceServerDelete(data *schema.ResourceData, meta interface{}) error {
+	client := meta.(*sdk.Conn)
 
-func resourceServerDelete(d *schema.ResourceData, m interface{}) error {
+	reqParams := new(sdk.RequestTerminateServerInstances)
+	reqParams.ServerInstanceNoList = []string{}
+
+	_, err := client.TerminateServerInstances(reqParams)
+	if err != nil {
+		return fmt.Errorf("Failed to create servers %s", err)
+	}
+
 	return nil
 }

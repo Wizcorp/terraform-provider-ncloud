@@ -2,6 +2,17 @@
 
 
 [[projects]]
+  branch = "master"
+  name = "github.com/NaverCloudPlatform/ncloud-sdk-go"
+  packages = [
+    "common",
+    "oauth",
+    "request",
+    "sdk"
+  ]
+  revision = "72ff04737e972c4dab8bfb5965252d0680214de5"
+
+[[projects]]
   name = "github.com/agext/levenshtein"
   packages = ["."]
   revision = "5f10fee965225ac1eecdc234c09daf5cd9e7f7b6"
@@ -441,6 +452,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "37b1dfa1faa7fb7f1638e4dad103736d2c423558dc0ffd6467c8c60e4d3353be"
+  inputs-digest = "208ebfc0435ad241e7c6e732aaf34a81f03e8e9eca373f4b2df61eab489227b0"
   solver-name = "gps-cdcl"
   solver-version = 1

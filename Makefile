@@ -1,6 +1,12 @@
 version := $(shell git tag --points-at $(git rev-parse HEAD) | grep "v\(.*\)" 2> /dev/null)
 release_args := --user Wizcorp --repo terraform-provider-ncloud --tag $(version)
 
+# Generate Services.md
+generate-services:
+	@go run \
+		src/ncloud-products-list/main.go > Services.md
+.PHONY: generate-services
+
 # Build the provider
 build:
 	go build \
@@ -24,16 +30,13 @@ zipfile := terraform-provider-ncloud-$(version)-$(target).zip
 # Make a release for a specific target platform
 release:
 ifndef target
-  $(error usage: mmake release target=(linux|darwin|windows))
+	$(error usage: mmake release target=(linux|darwin|windows))
 endif
-
 	echo $(version)
 ifndef version 
-  $(error usage: current commit is not tagged, please make sure to tag before releasing)
+	$(error usage: current commit is not tagged, please make sure to tag before releasing)
 endif
-
 	GOOS=$(target) mmake build
-
 ifeq ($(OS),Windows_NT)
 	Compress-Archive -Path ./build/terraform-provider-ncloud -CompressionLevel Fastest -DestinationPath $(zipfile)
 else

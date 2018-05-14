@@ -45,6 +45,23 @@ mmake
 
 See `mmake help` for more project-related commands.
 
+> Update the list of code for server types and images
+
+```shell
+# *nix, macOS
+export NCLOUD_ACCESS_KEY=""
+export NCLOUD_SECRET_KEY=""
+
+# Windows
+set-item env:NCLOUD_ACCESS_KEY=""
+set-item env:NCLOUD_SECRET_KEY=""
+
+mmake generate-services
+```
+
+This command will update the `Service.md` file. This file contains a list
+of relevant codes you will need to put in your Terraform configuration.
+
 > Release
 
 ```shell
@@ -63,7 +80,10 @@ how to create your token.
 
 ## Acknowledgements
 
-TBD
+Inspiration:
+
+- [terraform-provider-linode](https://github.com/btobolaski/terraform-provider-linode)
+- [terraform-provider-aws](https://github.com/terraform-providers/terraform-provider-aws)
 
 ## License
 
