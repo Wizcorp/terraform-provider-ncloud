@@ -1,6 +1,12 @@
 version := $(shell git tag --points-at $(git rev-parse HEAD) | grep "v\(.*\)" 2> /dev/null)
 release_args := --user Wizcorp --repo terraform-provider-ncloud --tag $(version)
 
+# Print out the list of known regions, zones, etc/
+list-services:
+	@go run \
+		src/ncloud-products-list/main.go
+.PHONY: generate-services
+
 # Generate Services.md
 generate-services:
 	@go run \
@@ -9,7 +15,7 @@ generate-services:
 
 # Build the provider
 build:
-	go build \
+	@go build \
 		-o build/terraform-provider-ncloud \
 		src/terraform-provider-ncloud/*.go
 .PHONY: build

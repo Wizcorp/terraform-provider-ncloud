@@ -5,8 +5,6 @@
 
 ## Installation
 
-## Usage
-
 Simply [download the release for your target platform](./releases), and
 place it into one of the following locations:
 
@@ -16,6 +14,25 @@ place it into one of the following locations:
      user's home directory.
 
 See https://www.terraform.io/docs/configuration/providers.html#third-party-plugins for more details.
+
+## Usage
+
+> ./main.tf
+
+```hcl
+provider "ncloud" {
+  access_key = "$NCLOUD_ACCESS_KEY"
+  secret_key = "$NCLOUD_SECRET_KEY"
+  region     = "$NCLOUD_DEFAULT_REGION"
+}
+
+resource "ncloud_instance" "gameserver" {
+  # coming zoon 
+}
+```
+
+See [Services.md](./Services.md) for a detailed lists of available
+regions, zones, servers and images.
 
 ## Development
 

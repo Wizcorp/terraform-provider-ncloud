@@ -9,27 +9,27 @@ import (
 
 // Virtual machines provided on
 // See: https://docs.ncloud.com/en/api_new/api_new-2-1.html
-func resourceServer() *schema.Resource {
+func resourceLoginKey() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceServerCreate,
-		Read:   resourceServerRead,
-		Delete: resourceServerDelete,
+		Create: resourceLoginKeyCreate,
+		Read:   resourceLoginKeyRead,
+		Delete: resourceLoginKeyDelete,
 		Schema: map[string]*schema.Schema{
-			"server_image_product_code": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Server image code, e.g",
-			},
 			"server_product_code": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Product code, e.g. Server Specification under https://www.ncloud.com/charge/calc",
+				Description: "Product code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#servers-server_product_code)",
+			},
+			"server_image_product_code": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Server image code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#images-server_image_product_code)",
 			},
 		},
 	}
 }
 
-func resourceServerCreate(data *schema.ResourceData, meta interface{}) error {
+func resourceLoginKeyCreate(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
 	reqParams := new(sdk.RequestCreateServerInstance)
@@ -45,7 +45,7 @@ func resourceServerCreate(data *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceServerRead(data *schema.ResourceData, meta interface{}) error {
+func resourceLoginKeyRead(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
 	reqParams := new(sdk.RequestGetServerInstanceList)
@@ -58,7 +58,7 @@ func resourceServerRead(data *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceServerDelete(data *schema.ResourceData, meta interface{}) error {
+func resourceLoginKeyDelete(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
 	reqParams := new(sdk.RequestTerminateServerInstances)

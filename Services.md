@@ -12,6 +12,19 @@
 | 6 | DE	 | Germany	 |
 | 7 | SGN	 | Singapore(New)	 |
 
+## Zones
+
+| # | Name       | Description   |
+| - | ---------- | ------------- |
+| 2 | KR-1	 | 가산 zone	 |
+| 3 | KR-2	 | 평촌 zone	 |
+| 10 | USW-1	 | 미국 서부 ZONE	 |
+| 20 | HK-1	 | 홍콩 ZONE	 |
+| 30 | SG-1	 | 싱가포르(Old) ZONE	 |
+| 40 | JP-1	 | 일본 ZONE	 |
+| 60 | DE-1	 | 독일 ZONE	 |
+| 70 | SGN-1	 | 싱가포르(New) ZONE	 |
+
 ## Servers (server_product_code)
 
 | Code             | Description                             |

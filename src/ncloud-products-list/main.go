@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	ncloud "github.com/NaverCloudPlatform/ncloud-sdk-go/common"
 	"github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 )
 
@@ -18,6 +19,19 @@ func main() {
 	if err != nil {
 		fmt.Printf("Failed to retrieve region list, %v", err)
 		os.Exit(1)
+	}
+
+	zonesList := []ncloud.Zone{}
+
+	for _, region := range regionsList.RegionList {
+		regionZonesList, err := client.GetZoneList(region.RegionNo)
+
+		if err != nil {
+			fmt.Printf("Failed to retrieve region list, region: %s, %v", region.RegionName, err)
+			os.Exit(1)
+		}
+
+		zonesList = append(zonesList, regionZonesList.Zone...)
 	}
 
 	serversReq := new(sdk.RequestGetServerProductList)
@@ -42,6 +56,14 @@ func main() {
 	fmt.Print("| - | ---------- | ------ |\n")
 	for _, region := range regionsList.RegionList {
 		fmt.Printf("| %s | %s\t | %s\t |\n", region.RegionNo, region.RegionCode, region.RegionName)
+	}
+	fmt.Print("\n")
+
+	fmt.Print("## Zones\n\n")
+	fmt.Print("| # | Name       | Description   |\n")
+	fmt.Print("| - | ---------- | ------------- |\n")
+	for _, zone := range zonesList {
+		fmt.Printf("| %s | %s\t | %s\t |\n", zone.ZoneNo, zone.ZoneName, zone.ZoneDescription)
 	}
 	fmt.Print("\n")
 
