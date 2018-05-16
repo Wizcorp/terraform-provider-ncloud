@@ -38,7 +38,7 @@ func NCloudProvider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"ncloud_instance":  resourceInstance(),
 			"ncloud_login_key": resourceLoginKey(),
-			"ncloud_public_ip": resourcePublicIp(),
+			"ncloud_public_ip": resourcePublicIP(),
 		},
 
 		ConfigureFunc: providerConfigure,

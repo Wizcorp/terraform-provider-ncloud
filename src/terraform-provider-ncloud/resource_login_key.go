@@ -15,32 +15,36 @@ func resourceLoginKey() *schema.Resource {
 		Read:   resourceLoginKeyRead,
 		Delete: resourceLoginKeyDelete,
 		Schema: map[string]*schema.Schema{
-			"server_product_code": &schema.Schema{
+			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Product code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#servers-server_product_code)",
+				Description: "Key name",
 			},
-			"server_image_product_code": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Server image code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#images-server_image_product_code)",
+			"private_key": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"fingerprint": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
 }
 
 func resourceLoginKeyCreate(data *schema.ResourceData, meta interface{}) error {
+	data.Partial(true)
 	client := meta.(*sdk.Conn)
+	name := data.Get("name").(string)
 
-	reqParams := new(sdk.RequestCreateServerInstance)
-	reqParams.ServerImageProductCode = data.Get("server_image_product_code").(string)
-	reqParams.ServerProductCode = data.Get("server_product_code").(string)
-	reqParams.ServerCreateCount = 1
-
-	_, err := client.CreateServerInstances(reqParams)
+	response, err := client.CreateLoginKey(name)
 	if err != nil {
-		return fmt.Errorf("Failed to create servers %s", err)
+		return fmt.Errorf("Failed to create login key %s", err)
 	}
+
+	data.SetId(name)
+	data.Set("private_key", response.PrivateKey)
+	data.SetPartial("private_key")
 
 	return nil
 }
@@ -48,12 +52,17 @@ func resourceLoginKeyCreate(data *schema.ResourceData, meta interface{}) error {
 func resourceLoginKeyRead(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
-	reqParams := new(sdk.RequestGetServerInstanceList)
+	reqParams := new(sdk.RequestGetLoginKeyList)
+	reqParams.KeyName = data.Id()
 
-	_, err := client.GetServerInstanceList(reqParams)
+	response, err := client.GetLoginKeyList(reqParams)
 	if err != nil {
-		return fmt.Errorf("Failed to create servers %s", err)
+		return fmt.Errorf("Failed to fetch key info %s", err)
 	}
+
+	keyInfo := response.LoginKeyList[0]
+	data.Set("fingerprint", keyInfo.Fingerprint)
+	data.SetPartial("fingerprint")
 
 	return nil
 }
@@ -66,7 +75,7 @@ func resourceLoginKeyDelete(data *schema.ResourceData, meta interface{}) error {
 
 	_, err := client.TerminateServerInstances(reqParams)
 	if err != nil {
-		return fmt.Errorf("Failed to create servers %s", err)
+		return fmt.Errorf("Failed to delete login key %s", err)
 	}
 
 	return nil

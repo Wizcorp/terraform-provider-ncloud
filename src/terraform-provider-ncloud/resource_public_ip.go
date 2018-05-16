@@ -9,64 +9,93 @@ import (
 
 // Virtual machines provided on
 // See: https://docs.ncloud.com/en/api_new/api_new-2-1.html
-func resourcePublicIp() *schema.Resource {
+func resourcePublicIP() *schema.Resource {
 	return &schema.Resource{
-		Create: resourcePublicIpCreate,
-		Read:   resourcePublicIpRead,
-		Delete: resourcePublicIpDelete,
+		Create: resourcePublicIPCreate,
+		Read:   resourcePublicIPRead,
+		Delete: resourcePublicIPDelete,
 		Schema: map[string]*schema.Schema{
-			"server_product_code": &schema.Schema{
+			"server_id": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Product code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#servers-server_product_code)",
 			},
-			"server_image_product_code": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Server image code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#images-server_image_product_code)",
+			"public_ip": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
 }
 
-func resourcePublicIpCreate(data *schema.ResourceData, meta interface{}) error {
+func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
+	serverID := data.Get("server_id").(string)
 
-	reqParams := new(sdk.RequestCreateServerInstance)
-	reqParams.ServerImageProductCode = data.Get("server_image_product_code").(string)
-	reqParams.ServerProductCode = data.Get("server_product_code").(string)
-	reqParams.ServerCreateCount = 1
+	readReqParams := new(sdk.RequestGetServerInstanceList)
 
-	_, err := client.CreateServerInstances(reqParams)
+	readResponse, err := client.GetServerInstanceList(readReqParams)
 	if err != nil {
-		return fmt.Errorf("Failed to create servers %s", err)
+		return fmt.Errorf("Failed to read server info %s", err)
 	}
+
+	if readResponse.TotalRows < 1 {
+		return fmt.Errorf("Received no servers in the API response")
+	}
+
+	serverInfo := readResponse.ServerInstanceList[0]
+
+	reqParams := new(sdk.RequestCreatePublicIPInstance)
+	reqParams.ServerInstanceNo = serverID
+	reqParams.RegionNo = serverInfo.Region.RegionNo
+	// API doc says we should be allowed to specify th zone
+	// reqParams.ZoneNo = serverInfo.Zone.ZoneNo
+
+	response, err := client.CreatePublicIPInstance(reqParams)
+	if err != nil {
+		return fmt.Errorf("Failed to create public IP %s", err)
+	}
+
+	if response.TotalRows < 1 {
+		return fmt.Errorf("Received no IPs in the API response")
+	}
+
+	ipInfo := response.PublicIPInstanceList[0]
+	data.SetId(ipInfo.PublicIPInstanceNo)
+
+	return resourcePublicIPRead(data, meta)
+}
+
+func resourcePublicIPRead(data *schema.ResourceData, meta interface{}) error {
+	client := meta.(*sdk.Conn)
+	reqParams := new(sdk.RequestPublicIPInstanceList)
+	reqParams.PublicIPInstanceNoList = []string{
+		data.Id(),
+	}
+
+	response, err := client.GetPublicIPInstanceList(reqParams)
+	if err != nil {
+		return fmt.Errorf("Failed to fetch public IP info %s", err)
+	}
+
+	ipInfo := response.PublicIPInstanceList[0]
+	data.Set("public_ip", ipInfo.PublicIP)
+	data.SetPartial("public_ip")
 
 	return nil
 }
 
-func resourcePublicIpRead(data *schema.ResourceData, meta interface{}) error {
+func resourcePublicIPDelete(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
-	reqParams := new(sdk.RequestGetServerInstanceList)
-
-	_, err := client.GetServerInstanceList(reqParams)
-	if err != nil {
-		return fmt.Errorf("Failed to create servers %s", err)
+	reqParams := new(sdk.RequestDeletePublicIPInstances)
+	reqParams.PublicIPInstanceNoList = []string{
+		data.Id(),
 	}
 
-	return nil
-}
-
-func resourcePublicIpDelete(data *schema.ResourceData, meta interface{}) error {
-	client := meta.(*sdk.Conn)
-
-	reqParams := new(sdk.RequestTerminateServerInstances)
-	reqParams.ServerInstanceNoList = []string{}
-
-	_, err := client.TerminateServerInstances(reqParams)
+	_, err := client.DeletePublicIPInstances(reqParams)
 	if err != nil {
-		return fmt.Errorf("Failed to create servers %s", err)
+		return fmt.Errorf("Failed to delete public IP %s", err)
 	}
 
 	return nil

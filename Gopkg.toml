@@ -34,5 +34,6 @@
   unused-packages = true
 
 [[constraint]]
-  branch = "master"
+  branch = "features/start-servers"
   name = "github.com/NaverCloudPlatform/ncloud-sdk-go"
+  source = "github.com/stelcheck/ncloud-sdk-go"

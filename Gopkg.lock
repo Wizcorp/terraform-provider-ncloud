@@ -2,7 +2,7 @@
 
 
 [[projects]]
-  branch = "master"
+  branch = "features/start-servers"
   name = "github.com/NaverCloudPlatform/ncloud-sdk-go"
   packages = [
     "common",
@@ -10,7 +10,8 @@
     "request",
     "sdk"
   ]
-  revision = "72ff04737e972c4dab8bfb5965252d0680214de5"
+  revision = "f0bad5cda5e5c9bfb9cca1f78f551486b8f30afb"
+  source = "github.com/stelcheck/ncloud-sdk-go"
 
 [[projects]]
   name = "github.com/agext/levenshtein"
@@ -67,8 +68,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "31a85efbe3bc741eb539d6310c8e66030b7c5cb7"
-  version = "v1.13.47"
+  revision = "c7cd1ebe87257cde9b65112fc876b0339ea0ac30"
+  version = "v1.13.49"
 
 [[projects]]
   branch = "master"
@@ -91,8 +92,8 @@
 [[projects]]
   name = "github.com/fatih/color"
   packages = ["."]
-  revision = "507f6050b8568533fb3f5504de8e5205fa62a114"
-  version = "v1.6.0"
+  revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
+  version = "v1.7.0"
 
 [[projects]]
   name = "github.com/go-ini/ini"
@@ -301,7 +302,7 @@
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "00c29f56e2386353d58c599509e8dc3801b0d716"
+  revision = "bb74f1db0675b241733089d5a1faa5dd8b0ef57b"
 
 [[projects]]
   branch = "master"
@@ -365,7 +366,7 @@
     "openpgp/packet",
     "openpgp/s2k"
   ]
-  revision = "2d027ae1dddd4694d54f7a8b6cbe78dca8720226"
+  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
 
 [[projects]]
   branch = "master"
@@ -381,13 +382,13 @@
     "internal/timeseries",
     "trace"
   ]
-  revision = "f73e4c9ed3b7ebdd5f699a16a880c2b1994e50dd"
+  revision = "2491c5de3490fced2f6cff376127c667efeed857"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "7dfd1290c7917b7ba22824b9d24954ab3002fe24"
+  revision = "7c87d13f8e835d2fb3a70a2912c811ed0c1d241b"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -414,7 +415,7 @@
   branch = "master"
   name = "google.golang.org/genproto"
   packages = ["googleapis/rpc/status"]
-  revision = "86e600f69ee4704c6efbf6a2a40a5c10700e76c2"
+  revision = "7bb2a897381c9c5ab2aeb8614f758d7766af68ff"
 
 [[projects]]
   name = "google.golang.org/grpc"
@@ -452,6 +453,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "208ebfc0435ad241e7c6e732aaf34a81f03e8e9eca373f4b2df61eab489227b0"
+  inputs-digest = "e793e63b7bd1474d98425ca548a795c685189ae9a450bd498a28f0bca983dce9"
   solver-name = "gps-cdcl"
   solver-version = 1
