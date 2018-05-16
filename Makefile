@@ -27,8 +27,8 @@ release-all:
 		--description $(version)
 
 	mmake release target=linux
-	mmake build target=darwin
-	mmake build target=windows
+	mmake release target=darwin
+	mmake release target=windows
 .PHONY: release-all
 
 zipfile := terraform-provider-ncloud-$(version)-$(target).zip
