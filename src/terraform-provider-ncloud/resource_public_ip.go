@@ -31,6 +31,8 @@ func resourcePublicIP() *schema.Resource {
 
 func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
+	data.Partial(true)
+
 	serverID := data.Get("server_id").(string)
 
 	readReqParams := new(sdk.RequestGetServerInstanceList)
@@ -63,23 +65,20 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 
 	ipInfo := response.PublicIPInstanceList[0]
 	data.SetId(ipInfo.PublicIPInstanceNo)
+	data.SetPartial("server_id")
 
 	return resourcePublicIPRead(data, meta)
 }
 
 func resourcePublicIPRead(data *schema.ResourceData, meta interface{}) error {
+	data.Partial(true)
 	client := meta.(*sdk.Conn)
-	reqParams := new(sdk.RequestPublicIPInstanceList)
-	reqParams.PublicIPInstanceNoList = []string{
-		data.Id(),
-	}
 
-	response, err := client.GetPublicIPInstanceList(reqParams)
+	ipInfo, err := getPublicIPInfo(client, data.Id())
 	if err != nil {
 		return fmt.Errorf("Failed to fetch public IP info %s", err)
 	}
 
-	ipInfo := response.PublicIPInstanceList[0]
 	data.Set("public_ip", ipInfo.PublicIP)
 	data.SetPartial("public_ip")
 
@@ -89,12 +88,21 @@ func resourcePublicIPRead(data *schema.ResourceData, meta interface{}) error {
 func resourcePublicIPDelete(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
+	disassociateResponse, err := client.DisassociatePublicIP(data.Id())
+	if err != nil {
+		if disassociateResponse.ReturnCode != 28102 {
+			return fmt.Errorf("Failed to disassociate IP with ID %s: %s", data.Id(), err)
+		}
+	}
+
+	waitForPublicIPDetach(client, data.Id())
+
 	reqParams := new(sdk.RequestDeletePublicIPInstances)
 	reqParams.PublicIPInstanceNoList = []string{
 		data.Id(),
 	}
 
-	_, err := client.DeletePublicIPInstances(reqParams)
+	_, err = client.DeletePublicIPInstances(reqParams)
 	if err != nil {
 		return fmt.Errorf("Failed to delete public IP %s", err)
 	}

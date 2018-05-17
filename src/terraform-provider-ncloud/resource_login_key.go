@@ -44,6 +44,9 @@ func resourceLoginKeyCreate(data *schema.ResourceData, meta interface{}) error {
 	}
 
 	data.SetId(name)
+
+	data.SetPartial("name")
+
 	data.Set("private_key", response.PrivateKey)
 	data.SetPartial("private_key")
 
@@ -51,6 +54,7 @@ func resourceLoginKeyCreate(data *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceLoginKeyRead(data *schema.ResourceData, meta interface{}) error {
+	data.Partial(true)
 	client := meta.(*sdk.Conn)
 
 	reqParams := new(sdk.RequestGetLoginKeyList)
@@ -71,10 +75,7 @@ func resourceLoginKeyRead(data *schema.ResourceData, meta interface{}) error {
 func resourceLoginKeyDelete(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
-	reqParams := new(sdk.RequestTerminateServerInstances)
-	reqParams.ServerInstanceNoList = []string{}
-
-	_, err := client.TerminateServerInstances(reqParams)
+	_, err := client.DeleteLoginKey(data.Id())
 	if err != nil {
 		return fmt.Errorf("Failed to delete login key %s", err)
 	}

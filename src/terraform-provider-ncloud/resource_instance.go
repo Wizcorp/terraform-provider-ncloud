@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -15,6 +16,12 @@ func resourceInstance() *schema.Resource {
 		Read:   resourceInstanceRead,
 		Delete: resourceInstanceDelete,
 		Schema: map[string]*schema.Schema{
+			"name": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Name",
+			},
 			"zone_number": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
@@ -63,6 +70,7 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 
 	createReqParams := new(sdk.RequestCreateServerInstance)
+	createReqParams.ServerName = data.Get("name").(string)
 	createReqParams.ZoneNo = data.Get("zone_number").(string)
 	createReqParams.ServerImageProductCode = data.Get("server_image_product_code").(string)
 	createReqParams.ServerProductCode = data.Get("server_product_code").(string)
@@ -72,7 +80,14 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 
 	response, err := client.CreateServerInstances(createReqParams)
 	if err != nil {
-		return fmt.Errorf("Failed to create server %s", err)
+		if response.ReturnCode == 23006 {
+			// Try again in a few seconds
+			time.Sleep(1 * time.Second)
+
+			return resourceInstanceCreate(data, meta)
+		}
+
+		return fmt.Errorf("Failed to create server: %s", err)
 	}
 
 	if response.TotalRows < 1 {
@@ -82,15 +97,19 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 	serverInfo := response.ServerInstanceList[0]
 	data.SetId(serverInfo.ServerInstanceNo)
 
-	startReqParams := new(sdk.RequestStartServerInstances)
-	startReqParams.ServerInstanceNoList = []string{
-		data.Id(),
+	data.SetPartial("name")
+	data.SetPartial("zone_number")
+	data.SetPartial("server_image_product_code")
+	data.SetPartial("server_product_code")
+	data.SetPartial("login_keyname")
+	data.SetPartial("termination_protection")
+
+	listReqParams := new(sdk.RequestGetServerInstanceList)
+	listReqParams.ServerInstanceNoList = []string{
+		serverInfo.ServerInstanceNo,
 	}
 
-	_, err = client.StartServerInstances(startReqParams)
-	if err != nil {
-		return fmt.Errorf("Failed to start server %s", err)
-	}
+	waitForServerStatus(client, data.Id(), "RUN")
 
 	return resourceInstanceRead(data, meta)
 }
@@ -98,19 +117,11 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 func resourceInstanceRead(data *schema.ResourceData, meta interface{}) error {
 	data.Partial(true)
 	client := meta.(*sdk.Conn)
+	serverInfo, err := getServerInfo(client, data.Id())
 
-	readReqParams := new(sdk.RequestGetServerInstanceList)
-
-	response, err := client.GetServerInstanceList(readReqParams)
 	if err != nil {
-		return fmt.Errorf("Failed to read server info %s", err)
+		return err
 	}
-
-	if response.TotalRows < 1 {
-		return fmt.Errorf("Received no servers in the API response")
-	}
-
-	serverInfo := response.ServerInstanceList[0]
 
 	data.Set("public_ip", serverInfo.PublicIP)
 	data.SetPartial("public_ip")
@@ -123,16 +134,52 @@ func resourceInstanceRead(data *schema.ResourceData, meta interface{}) error {
 
 func resourceInstanceDelete(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
+	publicIP := data.Get("public_ip").(string)
+
+	publicIPReqParams := new(sdk.RequestPublicIPInstanceList)
+	publicIPReqParams.IsAssociated = true
+
+	publicIPListResponse, err := client.GetPublicIPInstanceList(publicIPReqParams)
+	if err != nil {
+		return fmt.Errorf("Failed to verify IP association for servers %s: %s", data.Id(), err)
+	}
+
+	for _, publicIPInstance := range publicIPListResponse.PublicIPInstanceList {
+		if publicIPInstance.PublicIP == publicIP {
+			_, err = client.DisassociatePublicIP(publicIPInstance.PublicIPInstanceNo)
+			if err != nil {
+				return fmt.Errorf("Failed to disassociate IP with ID %s from server %s: %s", publicIP, data.Id(), err)
+			}
+
+			break
+		}
+	}
+
+	stopReqParams := new(sdk.RequestStopServerInstances)
+	stopReqParams.ServerInstanceNoList = []string{
+		data.Id(),
+	}
+
+	stopResponse, err := client.StopServerInstances(stopReqParams)
+	if err != nil {
+		if stopResponse.ReturnCode != 25041 {
+			return fmt.Errorf("Failed to stop servers %s: %s", data.Id(), err)
+		}
+	}
+
+	waitForServerStatus(client, data.Id(), "NSTOP")
 
 	terminateReqParams := new(sdk.RequestTerminateServerInstances)
 	terminateReqParams.ServerInstanceNoList = []string{
 		data.Id(),
 	}
 
-	_, err := client.TerminateServerInstances(terminateReqParams)
+	_, err = client.TerminateServerInstances(terminateReqParams)
 	if err != nil {
-		return fmt.Errorf("Failed to terminate servers %s", err)
+		return fmt.Errorf("Failed to terminate servers %s: %s", data.Id(), err)
 	}
+
+	waitForServerStatus(client, data.Id(), "TERMT")
 
 	return nil
 }

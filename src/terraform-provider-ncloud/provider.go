@@ -52,8 +52,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	client := sdk.NewConnection(accessKey, secretKey)
 
 	_, err := client.GetRegionList()
-	// client.GetServerProductList()
-	// client.GetServerImageProductList()
 	if err != nil {
 		return nil, fmt.Errorf("Failed to connect to NCloud APIs, %s", err)
 	}
