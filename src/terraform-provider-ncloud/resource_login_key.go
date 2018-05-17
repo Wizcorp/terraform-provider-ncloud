@@ -18,6 +18,7 @@ func resourceLoginKey() *schema.Resource {
 			"name": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Key name",
 			},
 			"private_key": &schema.Schema{

@@ -18,26 +18,31 @@ func resourceInstance() *schema.Resource {
 			"zone_number": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Zone number (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#zones)",
 			},
 			"server_product_code": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Product code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#servers-server_product_code)",
 			},
 			"server_image_product_code": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Server image code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#images-server_image_product_code)",
 			},
 			"login_keyname": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "login keyname",
 			},
 			"termination_protection": &schema.Schema{
 				Type:        schema.TypeBool,
 				Required:    false,
+				ForceNew:    true,
 				Description: "login keyname",
 				Default:     false,
 			},

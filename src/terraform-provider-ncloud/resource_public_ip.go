@@ -17,6 +17,7 @@ func resourcePublicIP() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"server_id": &schema.Schema{
 				Type:        schema.TypeString,
+				ForceNew:    true,
 				Required:    true,
 				Description: "Product code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#servers-server_product_code)",
 			},
