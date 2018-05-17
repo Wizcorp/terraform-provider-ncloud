@@ -13,9 +13,11 @@ generate-services:
 		src/ncloud-products-list/main.go > Services.md
 .PHONY: generate-services
 
-# Build the provider
+# Build the provider 
+# CGO_ENABLED=0 must be set to run on Alpine
+# See https://stackoverflow.com/a/36308464/262831
 build:
-	@go build \
+	CGO_ENABLED=0 go build \
 		-o build/terraform-provider-ncloud \
 		src/terraform-provider-ncloud/*.go
 .PHONY: build
