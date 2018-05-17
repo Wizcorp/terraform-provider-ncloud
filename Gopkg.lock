@@ -10,7 +10,7 @@
     "request",
     "sdk"
   ]
-  revision = "f0bad5cda5e5c9bfb9cca1f78f551486b8f30afb"
+  revision = "5fd6750b50f03d491b794e178fe5fce311a721b7"
   source = "github.com/stelcheck/ncloud-sdk-go"
 
 [[projects]]
@@ -68,8 +68,8 @@
     "service/s3",
     "service/sts"
   ]
-  revision = "c7cd1ebe87257cde9b65112fc876b0339ea0ac30"
-  version = "v1.13.49"
+  revision = "ee7b4b1162937cba700de23bd90acb742982e626"
+  version = "v1.13.50"
 
 [[projects]]
   branch = "master"

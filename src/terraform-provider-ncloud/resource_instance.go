@@ -60,6 +60,13 @@ func resourceInstance() *schema.Resource {
 				Description: "script to run at first boot",
 				Default:     false,
 			},
+			"public_ip_instance": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Public IP ID",
+				Default:     "",
+			},
 			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -120,6 +127,19 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 
 	waitForServerStatus(client, data.Id(), "RUN")
 
+	publicIP := data.Get("public_ip_instance").(string)
+	if publicIP != "" {
+		associateReqParams := new(sdk.RequestAssociatePublicIP)
+		associateReqParams.PublicIPInstanceNo = publicIP
+		associateReqParams.ServerInstanceNo = data.Id()
+
+		_, err = client.AssociatePublicIP(associateReqParams)
+		if err != nil {
+			return fmt.Errorf("Failed to associate public IP %s", err)
+		}
+	}
+	data.SetPartial("public_ip_instance")
+
 	return resourceInstanceRead(data, meta)
 }
 
@@ -159,6 +179,8 @@ func resourceInstanceDelete(data *schema.ResourceData, meta interface{}) error {
 			if err != nil {
 				return fmt.Errorf("Failed to disassociate IP with ID %s from server %s: %s", publicIP, data.Id(), err)
 			}
+
+			waitForPublicIPDetach(client, publicIPInstance.PublicIPInstanceNo)
 
 			break
 		}

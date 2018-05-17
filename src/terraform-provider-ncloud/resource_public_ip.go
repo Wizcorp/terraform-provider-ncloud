@@ -15,12 +15,6 @@ func resourcePublicIP() *schema.Resource {
 		Read:   resourcePublicIPRead,
 		Delete: resourcePublicIPDelete,
 		Schema: map[string]*schema.Schema{
-			"server_id": &schema.Schema{
-				Type:        schema.TypeString,
-				ForceNew:    true,
-				Required:    true,
-				Description: "Product code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#servers-server_product_code)",
-			},
 			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -32,8 +26,6 @@ func resourcePublicIP() *schema.Resource {
 func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 	data.Partial(true)
-
-	serverID := data.Get("server_id").(string)
 
 	readReqParams := new(sdk.RequestGetServerInstanceList)
 
@@ -49,7 +41,6 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 	serverInfo := readResponse.ServerInstanceList[0]
 
 	reqParams := new(sdk.RequestCreatePublicIPInstance)
-	reqParams.ServerInstanceNo = serverID
 	reqParams.RegionNo = serverInfo.Region.RegionNo
 	// API doc says we should be allowed to specify th zone
 	// reqParams.ZoneNo = serverInfo.Zone.ZoneNo
@@ -65,7 +56,6 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 
 	ipInfo := response.PublicIPInstanceList[0]
 	data.SetId(ipInfo.PublicIPInstanceNo)
-	data.SetPartial("server_id")
 
 	return resourcePublicIPRead(data, meta)
 }
