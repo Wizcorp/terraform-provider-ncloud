@@ -41,7 +41,7 @@ func resourceInstance() *schema.Resource {
 			},
 			"termination_protection": &schema.Schema{
 				Type:        schema.TypeBool,
-				Required:    false,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "login keyname",
 				Default:     false,
