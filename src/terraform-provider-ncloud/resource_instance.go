@@ -53,6 +53,13 @@ func resourceInstance() *schema.Resource {
 				Description: "login keyname",
 				Default:     false,
 			},
+			"user_data": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "script to run at first boot",
+				Default:     false,
+			},
 			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -76,6 +83,7 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 	createReqParams.ServerProductCode = data.Get("server_product_code").(string)
 	createReqParams.LoginKeyName = data.Get("login_keyname").(string)
 	createReqParams.IsProtectServerTermination = data.Get("termination_protection").(bool)
+	createReqParams.UserData = data.Get("user_data").(string)
 	createReqParams.ServerCreateCount = 1
 
 	response, err := client.CreateServerInstances(createReqParams)
@@ -103,6 +111,7 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 	data.SetPartial("server_product_code")
 	data.SetPartial("login_keyname")
 	data.SetPartial("termination_protection")
+	data.SetPartial("user_data")
 
 	listReqParams := new(sdk.RequestGetServerInstanceList)
 	listReqParams.ServerInstanceNoList = []string{

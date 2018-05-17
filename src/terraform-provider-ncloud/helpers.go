@@ -21,7 +21,7 @@ func getServerInfo(client *sdk.Conn, serverID string) (*sdk.ServerInstance, erro
 		return nil, fmt.Errorf("Received no servers in the API response")
 	}
 
-	if response.TotalRows == 0 {
+	if response.TotalRows == 0 || len(response.ServerInstanceList) == 0 {
 		return nil, nil
 	}
 
