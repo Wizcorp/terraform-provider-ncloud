@@ -18,21 +18,11 @@ func NCloudProvider() *schema.Provider {
 				DefaultFunc:  schema.EnvDefaultFunc("NCLOUD_ACCESS_KEY_ID", nil),
 				InputDefault: "",
 			},
-
 			"secret_key": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				DefaultFunc:  schema.EnvDefaultFunc("NCLOUD_SECRET_ACCESS_KEY", nil),
 				InputDefault: "",
-			},
-			"region": {
-				Type:     schema.TypeString,
-				Required: true,
-				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"NCLOUD_REGION",
-					"NCLOUD_DEFAULT_REGION",
-				}, nil),
-				InputDefault: "KO-1",
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{

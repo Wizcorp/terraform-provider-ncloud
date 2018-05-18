@@ -2,10 +2,33 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/NaverCloudPlatform/ncloud-sdk-go/sdk"
 	"github.com/hashicorp/terraform/helper/schema"
 )
+
+func retryResourcePublicIPCreate(client *sdk.Conn, params *sdk.RequestCreatePublicIPInstance, count int) (*sdk.PublicIPInstance, error) {
+
+	response, err := client.CreatePublicIPInstance(params)
+	if err != nil {
+		if response.ReturnCode == 10101 && count != 0 {
+			// Hack - retry later, we might have more servers
+			// and therefore it might succeed
+			time.Sleep(5 * time.Second)
+
+			return retryResourcePublicIPCreate(client, params, count-1)
+		}
+
+		return nil, fmt.Errorf("Failed to create public IP %s", err)
+	}
+
+	if response.TotalRows < 1 {
+		return nil, fmt.Errorf("Received no IPs in the API response")
+	}
+
+	return &response.PublicIPInstanceList[0], nil
+}
 
 // Virtual machines provided on
 // See: https://docs.ncloud.com/en/api_new/api_new-2-1.html
@@ -15,6 +38,12 @@ func resourcePublicIP() *schema.Resource {
 		Read:   resourcePublicIPRead,
 		Delete: resourcePublicIPDelete,
 		Schema: map[string]*schema.Schema{
+			"region_number": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Region number (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#regions)",
+			},
 			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -27,34 +56,15 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 	data.Partial(true)
 
-	readReqParams := new(sdk.RequestGetServerInstanceList)
-
-	readResponse, err := client.GetServerInstanceList(readReqParams)
-	if err != nil {
-		return fmt.Errorf("Failed to read server info %s", err)
-	}
-
-	if readResponse.TotalRows < 1 {
-		return fmt.Errorf("Received no servers in the API response")
-	}
-
-	serverInfo := readResponse.ServerInstanceList[0]
-
 	reqParams := new(sdk.RequestCreatePublicIPInstance)
-	reqParams.RegionNo = serverInfo.Region.RegionNo
+	reqParams.RegionNo = data.Get("region_number").(string)
 	// API doc says we should be allowed to specify th zone
 	// reqParams.ZoneNo = serverInfo.Zone.ZoneNo
 
-	response, err := client.CreatePublicIPInstance(reqParams)
+	ipInfo, err := retryResourcePublicIPCreate(client, reqParams, 5)
 	if err != nil {
-		return fmt.Errorf("Failed to create public IP %s", err)
+		return err
 	}
-
-	if response.TotalRows < 1 {
-		return fmt.Errorf("Received no IPs in the API response")
-	}
-
-	ipInfo := response.PublicIPInstanceList[0]
 	data.SetId(ipInfo.PublicIPInstanceNo)
 
 	return resourcePublicIPRead(data, meta)
