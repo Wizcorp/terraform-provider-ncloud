@@ -15,14 +15,14 @@ func NCloudProvider() *schema.Provider {
 			"access_key": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				DefaultFunc:  schema.EnvDefaultFunc("NCLOUD_ACCESS_KEY", nil),
+				DefaultFunc:  schema.EnvDefaultFunc("NCLOUD_ACCESS_KEY_ID", nil),
 				InputDefault: "",
 			},
 
 			"secret_key": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				DefaultFunc:  schema.EnvDefaultFunc("NCLOUD_SECRET_KEY", nil),
+				DefaultFunc:  schema.EnvDefaultFunc("NCLOUD_SECRET_ACCESS_KEY", nil),
 				InputDefault: "",
 			},
 			"region": {
