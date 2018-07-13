@@ -7,23 +7,23 @@
 | 1 | KR	 | Korea	 |
 | 2 | USW	 | US-West	 |
 | 3 | HK	 | HongKong	 |
-| 4 | SG	 | Singapore(Old)	 |
-| 5 | JP	 | Japan	 |
+| 5 | JP	 | Japan(Old)	 |
 | 6 | DE	 | Germany	 |
 | 7 | SGN	 | Singapore(New)	 |
+| 8 | JPN	 | Japan(New)	 |
 
 ## Zones
 
 | # | Name       | Description   |
 | - | ---------- | ------------- |
-| 2 | KR-1	 | 가산 zone	 |
 | 3 | KR-2	 | 평촌 zone	 |
+| 2 | KR-1	 | 가산 zone	 |
 | 10 | USW-1	 | 미국 서부 ZONE	 |
 | 20 | HK-1	 | 홍콩 ZONE	 |
-| 30 | SG-1	 | 싱가포르(Old) ZONE	 |
 | 40 | JP-1	 | 일본 ZONE	 |
 | 60 | DE-1	 | 독일 ZONE	 |
 | 70 | SGN-1	 | 싱가포르(New) ZONE	 |
+| 80 | JPN-1	 | 일본(New) ZONE	 |
 
 ## Servers (server_product_code)
 
@@ -44,8 +44,6 @@
 | SPSVRSTAND000051 | vCPU 8EA, Memory 8GB, Disk 50GB	 |
 | SPSVRSTAND000006 | vCPU 8EA, Memory 16GB, Disk 50GB	 |
 | SPSVRSTAND000055 | vCPU 8EA, Memory 32GB, Disk 50GB	 |
-| SPSVRSTAND000030 | vCPU 12EA, Memory 16GB, Disk 50GB	 |
-| SPSVRSTAND000022 | vCPU 12EA, Memory 32GB, Disk 50GB	 |
 | SPSVRSTAND000053 | vCPU 16EA, Memory 16GB, Disk 50GB	 |
 | SPSVRSTAND000046 | vCPU 16EA, Memory 32GB, Disk 50GB	 |
 | SPSVRSSD00000003 | vCPU 2EA, Memory 4GB, [SSD]Disk 50GB	 |
@@ -58,8 +56,6 @@
 | SPSVRSSD00000006 | vCPU 8EA, Memory 8GB, [SSD]Disk 50GB	 |
 | SPSVRSSD00000007 | vCPU 8EA, Memory 16GB, [SSD]Disk 50GB	 |
 | SPSVRSSD00000014 | vCPU 8EA, Memory 32GB, [SSD]Disk 50GB	 |
-| SPSVRSSD00000008 | vCPU 12EA, Memory 16GB, [SSD]Disk 50GB	 |
-| SPSVRSSD00000015 | vCPU 12EA, Memory 32GB, [SSD]Disk 50GB	 |
 | SPSVRSSD00000009 | vCPU 16EA, Memory 16GB, [SSD]Disk 50GB	 |
 | SPSVRSSD00000016 | vCPU 16EA, Memory 32GB, [SSD]Disk 50GB	 |
 | SPSVRSTAND000059 | vCPU 8EA, Memory 64GB, Disk 50GB	 |

@@ -89,9 +89,13 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 	createReqParams.ServerImageProductCode = data.Get("server_image_product_code").(string)
 	createReqParams.ServerProductCode = data.Get("server_product_code").(string)
 	createReqParams.LoginKeyName = data.Get("login_keyname").(string)
-	createReqParams.IsProtectServerTermination = data.Get("termination_protection").(bool)
 	createReqParams.UserData = data.Get("user_data").(string)
 	createReqParams.ServerCreateCount = 1
+	createReqParams.IsProtectServerTermination = "false"
+
+	if data.Get("termination_protection").(bool) {
+		createReqParams.IsProtectServerTermination = "true"
+	}
 
 	response, err := client.CreateServerInstances(createReqParams)
 	if err != nil {
@@ -166,7 +170,7 @@ func resourceInstanceDelete(data *schema.ResourceData, meta interface{}) error {
 	publicIP := data.Get("public_ip").(string)
 
 	publicIPReqParams := new(sdk.RequestPublicIPInstanceList)
-	publicIPReqParams.IsAssociated = true
+	publicIPReqParams.IsAssociated = "true"
 
 	publicIPListResponse, err := client.GetPublicIPInstanceList(publicIPReqParams)
 	if err != nil {

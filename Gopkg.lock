@@ -2,7 +2,6 @@
 
 
 [[projects]]
-  branch = "features/start-servers"
   name = "github.com/NaverCloudPlatform/ncloud-sdk-go"
   packages = [
     "common",
@@ -10,8 +9,8 @@
     "request",
     "sdk"
   ]
-  revision = "5fd6750b50f03d491b794e178fe5fce311a721b7"
-  source = "github.com/stelcheck/ncloud-sdk-go"
+  revision = "8c64bf395f0bbd113f194df7495cc2eaf8119845"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/agext/levenshtein"
@@ -453,6 +452,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e793e63b7bd1474d98425ca548a795c685189ae9a450bd498a28f0bca983dce9"
+  inputs-digest = "5e6be4c4dcdd6f0d3160fad63f79f046c4556865077e29352f1ff1179f144698"
   solver-name = "gps-cdcl"
   solver-version = 1

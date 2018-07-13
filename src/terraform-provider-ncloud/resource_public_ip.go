@@ -44,6 +44,12 @@ func resourcePublicIP() *schema.Resource {
 				ForceNew:    true,
 				Description: "Region number (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#regions)",
 			},
+			"zone_number": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Zone number (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#regions)",
+			},
 			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -58,8 +64,7 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 
 	reqParams := new(sdk.RequestCreatePublicIPInstance)
 	reqParams.RegionNo = data.Get("region_number").(string)
-	// API doc says we should be allowed to specify th zone
-	// reqParams.ZoneNo = serverInfo.Zone.ZoneNo
+	reqParams.ZoneNo = data.Get("zone_number").(string)
 
 	ipInfo, err := retryResourcePublicIPCreate(client, reqParams, 5)
 	if err != nil {

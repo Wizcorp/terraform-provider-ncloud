@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	accessKey := os.Getenv("NCLOUD_ACCESS_KEY")
-	secretKey := os.Getenv("NCLOUD_SECRET_KEY")
+	accessKey := os.Getenv("NCLOUD_ACCESS_KEY_ID")
+	secretKey := os.Getenv("NCLOUD_SECRET_ACCESS_KEY")
 
 	client := sdk.NewConnection(accessKey, secretKey)
 
