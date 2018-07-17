@@ -9,8 +9,7 @@
     "request",
     "sdk"
   ]
-  revision = "8c64bf395f0bbd113f194df7495cc2eaf8119845"
-  version = "v1.0.0"
+  revision = "e772903e2552e6b7115d2aa5161117669b2cf9ea"
 
 [[projects]]
   name = "github.com/agext/levenshtein"
