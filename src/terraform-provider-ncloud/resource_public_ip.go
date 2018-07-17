@@ -63,8 +63,8 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 	data.Partial(true)
 
 	reqParams := new(sdk.RequestCreatePublicIPInstance)
-	reqParams.RegionNo = data.Get("region_number").(string)
 	reqParams.ZoneNo = data.Get("zone_number").(string)
+	reqParams.RegionNo = data.Get("region_number").(string)
 
 	ipInfo, err := retryResourcePublicIPCreate(client, reqParams, 5)
 	if err != nil {
@@ -78,8 +78,9 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 func resourcePublicIPRead(data *schema.ResourceData, meta interface{}) error {
 	data.Partial(true)
 	client := meta.(*sdk.Conn)
+	zoneNo := data.Get("zone_number").(string)
 
-	ipInfo, err := getPublicIPInfo(client, data.Id())
+	ipInfo, err := getPublicIPInfo(client, zoneNo, data.Id())
 	if err != nil {
 		return fmt.Errorf("Failed to fetch public IP info %s", err)
 	}
@@ -92,6 +93,7 @@ func resourcePublicIPRead(data *schema.ResourceData, meta interface{}) error {
 
 func resourcePublicIPDelete(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
+	zoneNo := data.Get("zone_number").(string)
 
 	disassociateResponse, err := client.DisassociatePublicIP(data.Id())
 	if err != nil {
@@ -100,7 +102,7 @@ func resourcePublicIPDelete(data *schema.ResourceData, meta interface{}) error {
 		}
 	}
 
-	waitForPublicIPDetach(client, data.Id())
+	waitForPublicIPDetach(client, zoneNo, data.Id())
 
 	reqParams := new(sdk.RequestDeletePublicIPInstances)
 	reqParams.PublicIPInstanceNoList = []string{

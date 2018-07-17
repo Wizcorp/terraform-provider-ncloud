@@ -168,6 +168,7 @@ func resourceInstanceRead(data *schema.ResourceData, meta interface{}) error {
 func resourceInstanceDelete(data *schema.ResourceData, meta interface{}) error {
 	client := meta.(*sdk.Conn)
 	publicIP := data.Get("public_ip").(string)
+	zoneNo := data.Get("zone_number").(string)
 
 	publicIPReqParams := new(sdk.RequestPublicIPInstanceList)
 	publicIPReqParams.IsAssociated = "true"
@@ -184,7 +185,7 @@ func resourceInstanceDelete(data *schema.ResourceData, meta interface{}) error {
 				return fmt.Errorf("Failed to disassociate IP with ID %s from server %s: %s", publicIP, data.Id(), err)
 			}
 
-			waitForPublicIPDetach(client, publicIPInstance.PublicIPInstanceNo)
+			waitForPublicIPDetach(client, zoneNo, publicIPInstance.PublicIPInstanceNo)
 
 			break
 		}

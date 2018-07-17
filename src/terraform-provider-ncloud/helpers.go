@@ -28,27 +28,30 @@ func getServerInfo(client *sdk.Conn, serverID string) (*sdk.ServerInstance, erro
 	return &response.ServerInstanceList[0], nil
 }
 
-func getPublicIPInfo(client *sdk.Conn, publicIPID string) (*sdk.PublicIPInstance, error) {
+func getPublicIPInfo(client *sdk.Conn, zoneNo string, publicIPID string) (*sdk.PublicIPInstance, error) {
 	reqParams := new(sdk.RequestPublicIPInstanceList)
 	reqParams.PublicIPInstanceNoList = []string{
 		publicIPID,
 	}
+	reqParams.ZoneNo = zoneNo
 
 	response, err := client.GetPublicIPInstanceList(reqParams)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch public IP info %s", err)
 	}
 
-	if response.TotalRows == 0 {
-		return nil, nil
+	if response.TotalRows == 0 || len(response.PublicIPInstanceList) == 0 {
+		return nil, fmt.Errorf("Public IP info not found, request (zone: %s, id: %s)", zoneNo, publicIPID)
 	}
 
-	return &response.PublicIPInstanceList[0], nil
+	ipInstance := response.PublicIPInstanceList[0]
+
+	return &ipInstance, nil
 }
 
-func waitForPublicIPDetach(client *sdk.Conn, publicIPID string) error {
+func waitForPublicIPDetach(client *sdk.Conn, zoneNo string, publicIPID string) error {
 	for {
-		IPInfo, err := getPublicIPInfo(client, publicIPID)
+		IPInfo, err := getPublicIPInfo(client, zoneNo, publicIPID)
 		if err != nil {
 			return fmt.Errorf("Failed to list server: %s", err)
 		}

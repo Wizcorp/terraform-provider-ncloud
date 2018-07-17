@@ -65,6 +65,10 @@ func resourceLoginKeyRead(data *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Failed to fetch key info %s", err)
 	}
 
+	if len(response.LoginKeyList) == 0 {
+		return fmt.Errorf("Failed to fetch key info, key name %s not found", reqParams.KeyName)
+	}
+
 	keyInfo := response.LoginKeyList[0]
 	data.Set("fingerprint", keyInfo.Fingerprint)
 	data.SetPartial("fingerprint")
