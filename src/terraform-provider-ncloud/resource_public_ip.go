@@ -70,7 +70,10 @@ func resourcePublicIPCreate(data *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+
 	data.SetId(ipInfo.PublicIPInstanceNo)
+	data.SetPartial("region_number")
+	data.SetPartial("zone_number")
 
 	return resourcePublicIPRead(data, meta)
 }
