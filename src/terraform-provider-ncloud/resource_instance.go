@@ -67,6 +67,13 @@ func resourceInstance() *schema.Resource {
 				Description: "Public IP ID",
 				Default:     "",
 			},
+			"acg_id": &schema.Schema{
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "ACG",
+				Default:     "",
+			},
 			"public_ip": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
@@ -92,6 +99,13 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 	createReqParams.UserData = data.Get("user_data").(string)
 	createReqParams.ServerCreateCount = 1
 	createReqParams.IsProtectServerTermination = "false"
+
+	acgID := data.Get("acg_id").(string)
+	if acgID != "" {
+		createReqParams.AccessControlGroupConfigurationNoList = []string{
+			acgID,
+		}
+	}
 
 	if data.Get("termination_protection").(bool) {
 		createReqParams.IsProtectServerTermination = "true"
@@ -123,6 +137,10 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 	data.SetPartial("login_keyname")
 	data.SetPartial("termination_protection")
 	data.SetPartial("user_data")
+
+	if acgID != "" {
+		data.SetPartial("acg_id")
+	}
 
 	listReqParams := new(sdk.RequestGetServerInstanceList)
 	listReqParams.ServerInstanceNoList = []string{
