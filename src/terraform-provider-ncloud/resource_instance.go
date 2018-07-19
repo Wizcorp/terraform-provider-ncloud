@@ -99,7 +99,7 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 
 	response, err := client.CreateServerInstances(createReqParams)
 	if err != nil {
-		if response.ReturnCode == 23006 {
+		if response != nil && response.ReturnCode == 23006 {
 			// Try again in a few seconds
 			time.Sleep(1 * time.Second)
 
