@@ -24,6 +24,10 @@ build:
 
 # Make a release for all supported platforms
 release-all:
+ifndef version 
+	$(error usage: current commit is not tagged, please make sure to tag before releasing)
+endif
+	git push --tags upstream master
 	github-release release $(release_args) \
 		--name $(version) \
 		--description $(version)
