@@ -8,12 +8,37 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+func disassociatePublicIPInstance(client *sdk.Conn, data *schema.ResourceData, publicIP string) error {
+	_, err := client.DisassociatePublicIP(publicIP)
+	if err != nil {
+		return fmt.Errorf("Failed to disassociate public IP %s", err)
+	}
+
+	data.SetPartial("public_ip_instance")
+	return nil
+}
+
+func associatePublicIPInstance(client *sdk.Conn, data *schema.ResourceData, publicIP string) error {
+	associateReqParams := new(sdk.RequestAssociatePublicIP)
+	associateReqParams.PublicIPInstanceNo = publicIP
+	associateReqParams.ServerInstanceNo = data.Id()
+
+	_, err := client.AssociatePublicIP(associateReqParams)
+	if err != nil {
+		return fmt.Errorf("Failed to associate public IP %s", err)
+	}
+
+	data.SetPartial("public_ip_instance")
+	return nil
+}
+
 // Virtual machines provided on
 // See: https://docs.ncloud.com/en/api_new/api_new-2-1.html
 func resourceInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceInstanceCreate,
 		Read:   resourceInstanceRead,
+		Update: resourceInstanceUpdate,
 		Delete: resourceInstanceDelete,
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -31,7 +56,7 @@ func resourceInstance() *schema.Resource {
 			"server_product_code": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
+				ForceNew:    false,
 				Description: "Product code (see https://github.com/Wizcorp/terraform-provider-ncloud/blob/master/Services.md#servers-server_product_code)",
 			},
 			"server_image_product_code": &schema.Schema{
@@ -63,7 +88,7 @@ func resourceInstance() *schema.Resource {
 			"public_ip_instance": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
+				ForceNew:    false,
 				Description: "Public IP ID",
 				Default:     "",
 			},
@@ -151,16 +176,11 @@ func resourceInstanceCreate(data *schema.ResourceData, meta interface{}) error {
 
 	publicIP := data.Get("public_ip_instance").(string)
 	if publicIP != "" {
-		associateReqParams := new(sdk.RequestAssociatePublicIP)
-		associateReqParams.PublicIPInstanceNo = publicIP
-		associateReqParams.ServerInstanceNo = data.Id()
-
-		_, err = client.AssociatePublicIP(associateReqParams)
+		err = associatePublicIPInstance(client, data, publicIP)
 		if err != nil {
-			return fmt.Errorf("Failed to associate public IP %s", err)
+			return err
 		}
 	}
-	data.SetPartial("public_ip_instance")
 
 	return resourceInstanceRead(data, meta)
 }
@@ -180,6 +200,41 @@ func resourceInstanceRead(data *schema.ResourceData, meta interface{}) error {
 	data.SetPartial("private_ip")
 
 	data.Partial(false)
+	return nil
+}
+
+func resourceInstanceUpdate(data *schema.ResourceData, meta interface{}) error {
+	data.Partial(true)
+	client := meta.(*sdk.Conn)
+
+	if data.HasChange("server_product_code") {
+		changeSpecsReqParams := new(sdk.RequestChangeServerInstanceSpec)
+		changeSpecsReqParams.ServerInstanceNo = data.Id()
+		changeSpecsReqParams.ServerProductCode = data.Get("server_product_code").(string)
+
+		_, err := client.ChangeServerInstanceSpec(changeSpecsReqParams)
+		if err != nil {
+			return err
+		}
+
+		data.SetPartial("server_product_code")
+	}
+
+	if data.HasChange("public_ip_instance") {
+		// client.DisassociatePublicIP
+		old, new := data.GetChange("public_ip_instance")
+
+		if new.(string) != "" {
+			return associatePublicIPInstance(client, data, new.(string))
+		} else if old != new {
+			return disassociatePublicIPInstance(client, data, old.(string))
+		}
+
+		data.SetPartial("public_ip_instance")
+	}
+
+	data.Partial(false)
+
 	return nil
 }
 
